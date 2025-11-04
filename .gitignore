@@ -1,0 +1,53 @@
+# Python virtual environments
+guardrails_env/
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# PyTorch and ML model artifacts
+*.pth
+*.pt
+*.ckpt
+*.bin
+*.safetensors
+models/
+
+# Data files (uncomment if you want to ignore data)
+# data/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and test outputs
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
+.env.local
