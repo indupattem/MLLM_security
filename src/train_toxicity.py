@@ -17,16 +17,34 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import numpy as np
 
 
-def load_beavertails_dataset(category="animal_abuse", save_local=True):
-    """Load the BeaverTails dataset from Hugging Face."""
+def load_beavertails_dataset(category="animal_abuse", save_local=True, test_size=0.2):
+    """Load the BeaverTails dataset from Hugging Face and split into train/test."""
     print(f"Loading BeaverTails dataset (category: {category})...")
     
     # Load dataset
     dataset = load_dataset("PKU-Alignment/BeaverTails-V", category)
     
+    # Check available splits
+    print(f"Available splits: {list(dataset.keys())}")
+    
+    # Get the train split
+    if 'train' in dataset:
+        full_dataset = dataset['train']
+    else:
+        # If no 'train' split, use the first available split
+        split_name = list(dataset.keys())[0]
+        full_dataset = dataset[split_name]
+        print(f"Using split: {split_name}")
+    
+    print(f"Total samples: {len(full_dataset)}")
+    print(f"Sample keys: {full_dataset[0].keys()}")
+    
+    # Split into train and test
+    print(f"\nCreating train/test split ({int((1-test_size)*100)}% train, {int(test_size*100)}% test)...")
+    dataset = full_dataset.train_test_split(test_size=test_size, seed=42)
+    
     print(f"Train size: {len(dataset['train'])}")
     print(f"Test size: {len(dataset['test'])}")
-    print(f"Sample keys: {dataset['train'][0].keys()}")
     
     # Optional: save locally for faster reload
     if save_local:

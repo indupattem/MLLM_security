@@ -40,12 +40,31 @@ def evaluate_model(model_path="../models/toxicity_classifier", category="animal_
     
     # Load test dataset
     print(f"\n2. Loading test dataset (category: {category})...")
-    dataset = load_dataset("PKU-Alignment/BeaverTails-V", category, split='test')
-    print(f"   Test samples: {len(dataset)}")
+    
+    # Try to load from saved split first
+    import os
+    if os.path.exists("../data/beavertails"):
+        print("   Loading from saved dataset...")
+        from datasets import load_from_disk
+        dataset = load_from_disk("../data/beavertails")
+        test_dataset = dataset['test']
+    else:
+        # Load and split if not cached
+        full_dataset = load_dataset("PKU-Alignment/BeaverTails-V", category)
+        if 'train' in full_dataset:
+            full_data = full_dataset['train']
+        else:
+            full_data = full_dataset[list(full_dataset.keys())[0]]
+        
+        # Create train/test split
+        dataset = full_data.train_test_split(test_size=0.2, seed=42)
+        test_dataset = dataset['test']
+    
+    print(f"   Test samples: {len(test_dataset)}")
     
     # Prepare data
-    texts = dataset['response']
-    true_labels = [0 if label == "yes" else 1 for label in dataset['is_response_safe']]
+    texts = test_dataset['response']
+    true_labels = [0 if label == "yes" else 1 for label in test_dataset['is_response_safe']]
     
     # Make predictions
     print("\n3. Making predictions...")
