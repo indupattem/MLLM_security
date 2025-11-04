@@ -86,23 +86,87 @@ You can get a token from: https://huggingface.co/settings/tokens
 
 ## Usage
 
-### Load BeaverTails Dataset
-```bash
-python src/train_toxicity.py
+### Quick Start (Recommended)
+The easiest way to get started is using the interactive quick start script:
+
+```powershell
+# Activate your environment
+.\guardrails_env\Scripts\Activate.ps1
+
+# Run the quick start menu
+python src\quickstart.py
 ```
 
-This will:
-- Download the BeaverTails dataset (animal_abuse category)
-- Print dataset structure
-- Save a local copy to `data/bevetrails/`
+This will guide you through:
+1. ✅ Environment verification
+2. ✅ Training the model
+3. ✅ Evaluation
+4. ✅ Interactive testing
 
-### Expected Output
+### Manual Usage
+
+#### 1. Train the Toxicity Classifier
+```powershell
+# This will take 10-30 minutes depending on your hardware
+python src\train_toxicity.py
 ```
-DatasetDict({
-    train: Dataset({...})
-    test: Dataset({...})
-})
-First sample: {'prompt': '...', 'category': 'animal_abuse', ...}
+
+**What it does:**
+- Downloads BeaverTails dataset (~150MB)
+- Fine-tunes DistilBERT for binary classification (safe vs unsafe)
+- Saves model to `models/toxicity_classifier/`
+- Reports training metrics (accuracy, F1, etc.)
+
+**Output:** Trained model with ~85-95% accuracy
+
+#### 2. Evaluate the Model
+```powershell
+python src\evaluate_model.py
+```
+
+**What it does:**
+- Loads the trained model
+- Evaluates on test set
+- Generates classification report
+- Creates visualization plots (saved to `results/`)
+
+**Output:** Metrics, confusion matrix, ROC curve, PR curve
+
+#### 3. Run Guardrail Pipeline Demo
+```powershell
+python src\guardrail_pipeline.py
+```
+
+**What it does:**
+- Loads trained model
+- Tests on example texts
+- Shows real-time safety predictions
+- Provides batch statistics
+
+**Output:** Safety predictions with confidence scores
+
+#### 4. Use in Your Code
+```python
+from guardrail_pipeline import GuardrailPipeline
+
+# Initialize pipeline
+pipeline = GuardrailPipeline(threshold=0.7)
+
+# Check single text
+result = pipeline.check_content("Your text here")
+if not result['is_safe']:
+    print(f"⚠️ Unsafe content detected! (confidence: {result['confidence']:.2%})")
+
+# Check multiple texts (more efficient)
+texts = ["Text 1", "Text 2", "Text 3"]
+results = pipeline.check_batch(texts)
+
+# Filter safe content only
+safe_texts = pipeline.filter_safe_content(texts)
+
+# Get statistics
+stats = pipeline.get_statistics(texts)
+print(f"Safe: {stats['safe_percentage']:.1f}%")
 ```
 
 ## Dependencies
@@ -118,14 +182,39 @@ First sample: {'prompt': '...', 'category': 'animal_abuse', ...}
 
 ## Development Status
 
-| Component | Status | Description |
-|-----------|--------|-------------|
-| Dataset Loading | ✅ Implemented | BeaverTails toxicity dataset |
-| Toxicity Training | ⏳ TODO | Fine-tune classifier |
-| Prompt Injection | ⏳ TODO | Detect adversarial prompts |
-| Guardrail Pipeline | ⏳ TODO | Production inference system |
-| Evaluation | ⏳ TODO | Metrics and benchmarking |
-| Utilities | ⏳ TODO | Helper functions |
+| Component | Status | File | Description |
+|-----------|--------|------|-------------|
+| Dataset Loading | ✅ Complete | `train_toxicity.py` | BeaverTails dataset loader |
+| Model Training | ✅ Complete | `train_toxicity.py` | Fine-tune DistilBERT classifier |
+| Guardrail Pipeline | ✅ Complete | `guardrail_pipeline.py` | Production inference system |
+| Evaluation | ✅ Complete | `evaluate_model.py` | Metrics and visualizations |
+| Utilities | ✅ Complete | `utils.py` | Helper functions |
+| Quick Start | ✅ Complete | `quickstart.py` | Interactive menu system |
+| Prompt Injection | ⏳ TODO | `train_prompt_injection.py` | Adversarial prompt detection |
+
+## Project Files Overview
+
+```
+src/
+├── quickstart.py              # 🚀 START HERE - Interactive menu
+├── train_toxicity.py          # Training script for toxicity classifier
+├── guardrail_pipeline.py      # Real-time content filtering pipeline
+├── evaluate_model.py          # Model evaluation and metrics
+├── utils.py                   # Helper functions (model loading, prediction)
+└── train_prompt_injection.py # TODO: Prompt injection detection
+
+models/
+└── toxicity_classifier/       # Saved model (created after training)
+    ├── config.json
+    ├── model.safetensors
+    └── tokenizer files
+
+data/
+└── beavertails/              # Cached dataset (created after first run)
+
+results/
+└── evaluation_plots.png      # Visualization outputs
+```
 
 ## Issues Resolved
 - ✅ Added `.gitignore` to prevent tracking virtual environment
