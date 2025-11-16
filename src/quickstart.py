@@ -76,10 +76,15 @@ def train_model():
     
     print("\n🚀 Starting training...")
     print("-" * 70)
-    
+    # Ask whether to use QLoRA (PEFT + bitsandbytes). Only enable if peft/bitsandbytes are installed
+    use_qlora = False
+    qlora_choice = input("Enable QLoRA (PEFT + bitsandbytes) for parameter-efficient fine-tuning? (yes/no) [no]: ").lower().strip()
+    if qlora_choice == 'yes':
+        use_qlora = True
+
     try:
         from train_toxicity import train_toxicity_classifier
-        trainer, results = train_toxicity_classifier()
+        trainer, results = train_toxicity_classifier(use_qlora=use_qlora)
         print("\n✅ Training completed successfully!")
         return True
     except Exception as e:
