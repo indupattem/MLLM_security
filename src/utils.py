@@ -67,15 +67,17 @@ def predict_safety(text, model, tokenizer, threshold=0.5):
     # Label mapping: 0 = safe, 1 = unsafe
     is_safe = predicted_class == 0
     label = "SAFE" if is_safe else "UNSAFE"
+    unsafe_prob = probs[0][1].item()  # Probability of being unsafe
     
     return {
         "text": text,
         "prediction": predicted_class,
         "label": label,
         "confidence": confidence,
+        "score": unsafe_prob,  # Probability of being UNSAFE (for UI)
         "is_safe": is_safe,
         "safe_probability": probs[0][0].item(),
-        "unsafe_probability": probs[0][1].item()
+        "unsafe_probability": unsafe_prob
     }
 
 
@@ -116,15 +118,17 @@ def batch_predict_safety(texts, model, tokenizer, threshold=0.5):
         confidence = probs[i][predicted_class].item()
         is_safe = predicted_class == 0
         label = "SAFE" if is_safe else "UNSAFE"
+        unsafe_prob = probs[i][1].item()
         
         results.append({
             "text": text,
             "prediction": predicted_class,
             "label": label,
             "confidence": confidence,
+            "score": unsafe_prob,  # Probability of being UNSAFE (for UI)
             "is_safe": is_safe,
             "safe_probability": probs[i][0].item(),
-            "unsafe_probability": probs[i][1].item()
+            "unsafe_probability": unsafe_prob
         })
     
     return results
